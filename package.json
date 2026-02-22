@@ -14,7 +14,8 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-scrollbar-hide": "^4.0.0"
+    "tailwind-scrollbar-hide": "^4.0.0",
+    "tree-cli": "^0.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
