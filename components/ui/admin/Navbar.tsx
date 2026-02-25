@@ -60,7 +60,7 @@ export default function AdminNavbar() {
           <div className="w-10 h-10 bg-[#FFA365] rounded-full flex items-center justify-center shadow-lg">
             <Shield className="text-black w-5 h-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight">PlacementOS <span className="text-[#FFA365] text-sm ml-1">ADMIN</span></span>
+          <span className="text-xl font-bold tracking-tight">EduView <span className="text-[#FFA365] text-sm ml-1">ADMIN</span></span>
         </Link>
 
         {/* Middle: Desktop Nav Pill */}

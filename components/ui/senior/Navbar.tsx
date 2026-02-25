@@ -1,8 +1,10 @@
+// components/ui/senior/Navbar.tsx
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Home, MessageSquare, Briefcase, BarChart3, Settings, X, Zap, Bell } from 'lucide-react';
+import { Home, MessageSquare, Briefcase, BarChart3, Settings, X, Zap, Bell, Award } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -17,9 +19,9 @@ const menuItems = [
 
 const ModernHamburger = ({ onClick }: { onClick: () => void }) => (
   <button onClick={onClick} className="flex flex-col gap-1.5 p-2 group active:scale-90 transition-transform">
-    <div className="w-6 h-1 bg-white rounded-full group-hover:bg-[#b4a9f8] transition-colors" />
-    <div className="w-9 h-1 bg-white rounded-full group-hover:bg-[#b4a9f8] transition-colors" />
-    <div className="w-5 h-1 bg-white rounded-full group-hover:bg-[#b4a9f8] transition-colors" />
+    <div className="w-6 h-1 bg-white rounded-full group-hover:bg-[#54E359] transition-colors" />
+    <div className="w-9 h-1 bg-white rounded-full group-hover:bg-[#54E359] transition-colors" />
+    <div className="w-5 h-1 bg-white rounded-full group-hover:bg-[#54E359] transition-colors" />
   </button>
 );
 
@@ -66,10 +68,10 @@ export default function Navbar() {
         
         {/* Left: Branding */}
         <Link href="/senior" className="flex items-center gap-3 shrink-0 cursor-pointer">
-          <div className="w-10 h-10 bg-[#b4a9f8] rounded-full flex items-center justify-center shadow-lg">
-            <div className="border-2 border-black w-4 h-4 rounded-sm" />
+          <div className="w-10 h-10 bg-[#54E359] rounded-full flex items-center justify-center shadow-lg">
+            <Award className="text-black w-5 h-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight">EduView</span>
+          <span className="text-xl font-bold tracking-tight">EduView <span className="text-[#54E359] text-sm ml-1">SENIOR</span></span>
         </Link>
 
         {/* Middle: Desktop Nav Pill */}
@@ -88,7 +90,7 @@ export default function Navbar() {
                 />
               )}
               <span className="relative z-10 flex items-center gap-2">
-                <item.icon size={18} className={activeTab === item.id ? 'text-[#b4a9f8]' : ''} />
+                <item.icon size={18} className={activeTab === item.id ? 'text-[#54E359]' : ''} />
                 {activeTab === item.id && <span className="text-sm font-semibold">{item.label}</span>}
               </span>
             </Link>
@@ -101,14 +103,14 @@ export default function Navbar() {
             <div className="flex flex-col items-end">
               <h2 className="text-sm font-bold leading-none mb-1">Hello, Jacob</h2>
               <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
-                <Zap size={10} className="text-[#b4a9f8] fill-[#b4a9f8]" />
+                <Zap size={10} className="text-[#54E359] fill-[#54E359]" />
                 <span>76% Progress</span>
               </div>
             </div>
 
             <motion.div 
               whileHover={{ scale: 1.05 }}
-              className="w-11 h-11 rounded-full border-2 border-[#b4a9f8] p-0.5 bg-[#d9d4fc] cursor-pointer"
+              className="w-11 h-11 rounded-full border-2 border-[#54E359] p-0.5 bg-[#d9d4fc] cursor-pointer"
             >
               <img 
                 src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jacob" 
@@ -156,7 +158,7 @@ export default function Navbar() {
                   onClick={() => setIsSidebarOpen(false)} 
                   className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
                 >
-                  <X size={24} className="text-[#b4a9f8]" />
+                  <X size={24} className="text-[#54E359]" />
                 </button>
               </div>
 
@@ -167,7 +169,7 @@ export default function Navbar() {
                       variants={itemVariants}
                       className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${
                         activeTab === item.id 
-                          ? 'bg-[#b4a9f8] text-black font-bold scale-[1.02]' 
+                          ? 'bg-[#54E359] text-black font-bold scale-[1.02]' 
                           : 'bg-white/5 text-gray-400 hover:text-white'
                       }`}
                     >
@@ -183,7 +185,7 @@ export default function Navbar() {
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jacob" className="w-10 h-10 rounded-full bg-[#d9d4fc]" alt="User" />
                     <div>
                         <p className="font-bold text-sm">Jacob S.</p>
-                        <p className="text-[10px] text-[#b4a9f8] uppercase font-bold">76% Progress</p>
+                        <p className="text-[10px] text-[#54E359] uppercase font-bold">76% Progress</p>
                     </div>
                 </div>
               </div>

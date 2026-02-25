@@ -1,8 +1,10 @@
+// components/ui/student/Navbar.tsx
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Home, Briefcase, FileText, CheckSquare, Settings, X, Zap, Bell } from 'lucide-react';
+import { Home, Briefcase, FileText, CheckSquare, Settings, X, Zap, Bell, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -56,9 +58,9 @@ export default function StudentNavbar() {
         {/* Left: Branding */}
         <Link href="/student" className="flex items-center gap-3 shrink-0 cursor-pointer">
           <div className="w-10 h-10 bg-[#b4a9f8] rounded-full flex items-center justify-center shadow-lg">
-            <div className="border-2 border-black w-4 h-4 rounded-sm" />
+            <GraduationCap className="text-black w-5 h-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight">PlacementOS</span>
+          <span className="text-xl font-bold tracking-tight">EduView <span className="text-[#b4a9f8] text-sm ml-1">STUDENT</span></span>
         </Link>
 
         {/* Middle: Desktop Nav Pill */}
