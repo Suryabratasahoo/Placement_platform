@@ -1,8 +1,11 @@
+// app/senior/queries/particularQuestion/page.tsx
+
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, MessageCircle, ThumbsUp, Send, ThumbsDown } from "lucide-react"
 import { useState } from "react"
+import Link from "next/link" // <-- Added Link import!
 
 // 1. Dedicated Floating Emoji Component
 const FloatingEmoji = ({ emoji, onClear }: { emoji: string; onClear: () => void }) => {
@@ -159,9 +162,13 @@ export default function QuestionDetailPage() {
         >
             {/* LEFT SIDEBAR */}
             <div className="lg:col-span-3 bg-[#0c0c0c] rounded-[40px] p-6 text-white flex flex-col shadow-xl h-full overflow-hidden">
-                <button className="flex items-center gap-2 text-sm opacity-80 hover:opacity-100 mb-6">
-                    <ArrowLeft size={16} /> Back
-                </button>
+                
+                {/* <-- WRAPPED THE BACK BUTTON IN A LINK HERE --> */}
+                <Link href="/senior/queries">
+                    <button className="flex items-center gap-2 text-sm opacity-80 hover:opacity-100 mb-6 transition-opacity">
+                        <ArrowLeft size={16} /> Back
+                    </button>
+                </Link>
 
                 <div className="space-y-4">
                     <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase">DSA • Linked List</p>

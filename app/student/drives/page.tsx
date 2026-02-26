@@ -12,6 +12,7 @@ import {
     Search
 } from "lucide-react"
 import { useState } from "react"
+import Link from "next/link" // <-- Added this import!
 
 export default function StudentDrivesPage() {
 
@@ -54,81 +55,83 @@ export default function StudentDrivesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
                     {drives.map((drive, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            className="relative h-64 bg-[#0c0c0c] rounded-[40px] p-6 overflow-hidden shadow-xl group cursor-pointer"
-                        >
+                        // <-- Wrapped the card in a Link tag and moved the key here!
+                        <Link href="/student/drives/particularDrive" key={i}>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                className="relative h-64 bg-[#0c0c0c] rounded-[40px] p-6 overflow-hidden shadow-xl group cursor-pointer"
+                            >
 
-                            {/* Decorative Scribble from Lead's Design */}
-                            <svg className="absolute right-0 top-0 h-full opacity-20 transition-opacity group-hover:opacity-40" viewBox="0 0 200 200">
-                                <path
-                                    fill="none"
-                                    stroke="white"
-                                    strokeWidth="1.5"
-                                    d="M100,20 C150,50 50,150 180,180"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
+                                {/* Decorative Scribble from Lead's Design */}
+                                <svg className="absolute right-0 top-0 h-full opacity-20 transition-opacity group-hover:opacity-40" viewBox="0 0 200 200">
+                                    <path
+                                        fill="none"
+                                        stroke="white"
+                                        strokeWidth="1.5"
+                                        d="M100,20 C150,50 50,150 180,180"
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
 
-                            {/* Top Icon */}
-                            <div className="flex justify-between relative z-10">
-                                <div className="w-10 h-10 bg-[#26282b] rounded-full border border-gray-600 flex items-center justify-center text-white">
-                                    <Briefcase size={16} />
+                                {/* Top Icon */}
+                                <div className="flex justify-between relative z-10">
+                                    <div className="w-10 h-10 bg-[#26282b] rounded-full border border-gray-600 flex items-center justify-center text-white">
+                                        <Briefcase size={16} />
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Content */}
-                            <div className="relative z-10 mt-4 space-y-2">
-                                <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase">
-                                    {drive.company}
-                                </p>
-
-                                <h2 className="text-white text-lg font-bold leading-snug">
-                                    {drive.role}
-                                </h2>
-
-                                <div className="text-white text-sm opacity-80 space-y-1 mt-2">
-                                    <p className="flex items-center gap-2">
-                                        <Calendar size={14} className="text-[#b4a9f8]" /> {drive.date}
+                                {/* Content */}
+                                <div className="relative z-10 mt-4 space-y-2">
+                                    <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase">
+                                        {drive.company}
                                     </p>
-                                    <p className="flex items-center gap-2">
-                                        <MapPin size={14} className="text-[#b4a9f8]" /> {drive.location}
-                                    </p>
-                                </div>
-                            </div>
 
-                            {/* Bottom CTA & Stats */}
-                            <div className="flex justify-between items-end relative z-10 mt-auto">
-                                <div className="text-white font-semibold text-sm">
-                                    <span className="text-green-400">{drive.ctc}</span>
+                                    <h2 className="text-white text-lg font-bold leading-snug">
+                                        {drive.role}
+                                    </h2>
+
+                                    <div className="text-white text-sm opacity-80 space-y-1 mt-2">
+                                        <p className="flex items-center gap-2">
+                                            <Calendar size={14} className="text-[#b4a9f8]" /> {drive.date}
+                                        </p>
+                                        <p className="flex items-center gap-2">
+                                            <MapPin size={14} className="text-[#b4a9f8]" /> {drive.location}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div className="relative w-12 h-12 flex items-center justify-center group/btn">
-                                    <svg
-                                        className="absolute inset-0 w-full h-full -rotate-90"
-                                        viewBox="0 0 100 100"
-                                    >
-                                        <circle
-                                            cx="50"
-                                            cy="50"
-                                            r="46"
-                                            fill="none"
-                                            stroke="#1783e1"
-                                            strokeWidth="3"
-                                            strokeLinecap="round"
-                                            className="stroke-dasharray-[289] stroke-dashoffset-[289] transition-all duration-700 group-hover/btn:stroke-dashoffset-0"
-                                        />
-                                    </svg>
-                                    <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition group-hover/btn:scale-105">
-                                        <ArrowRight className="w-4 h-4 text-black" />
-                                    </button>
-                                </div>
-                            </div>
+                                {/* Bottom CTA & Stats */}
+                                <div className="flex justify-between items-end relative z-10 mt-auto">
+                                    <div className="text-white font-semibold text-sm">
+                                        <span className="text-green-400">{drive.ctc}</span>
+                                    </div>
 
-                        </motion.div>
+                                    <div className="relative w-12 h-12 flex items-center justify-center group/btn">
+                                        <svg
+                                            className="absolute inset-0 w-full h-full -rotate-90"
+                                            viewBox="0 0 100 100"
+                                        >
+                                            <circle
+                                                cx="50"
+                                                cy="50"
+                                                r="46"
+                                                fill="none"
+                                                stroke="#1783e1"
+                                                strokeWidth="3"
+                                                strokeLinecap="round"
+                                                className="stroke-dasharray-[289] stroke-dashoffset-[289] transition-all duration-700 group-hover/btn:stroke-dashoffset-0"
+                                            />
+                                        </svg>
+                                        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition group-hover/btn:scale-105 pointer-events-none">
+                                            <ArrowRight className="w-4 h-4 text-black" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </motion.div>
+                        </Link>
                     ))}
                 </div>
             </div>
