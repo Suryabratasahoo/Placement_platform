@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
 import "./globals.css";
+import { Toaster } from 'react-hot-toast';
 
 const monaSans = Mona_Sans({
   variable: "--font-mona-sans",
@@ -22,6 +23,16 @@ export default function RootLayout({
     <html lang="en" className={monaSans.variable}>
       <body className="antialiased font-sans">
         {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#1a1a1a',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }
+          }}
+        />
       </body>
     </html>
   );
