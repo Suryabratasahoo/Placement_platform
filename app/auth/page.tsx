@@ -14,6 +14,7 @@ import { useEffect } from "react"
 import Fuse from "fuse.js"
 import { toast } from "react-hot-toast"
 
+
 type Role = "student" | "senior" | null;
 
 export default function AuthPage() {
@@ -23,11 +24,12 @@ export default function AuthPage() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [isSendingOtp, setIsSendingOtp] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+    const [timeLeft, setTimeLeft] = useState(300);
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [placementGoal, setPlacementGoal] = useState<string>("");
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
+    const [signupToken, setSignupToken] = useState("");
 
     // New Fields
     const [branch, setBranch] = useState("");
@@ -36,6 +38,18 @@ export default function AuthPage() {
     const [companySearch, setCompanySearch] = useState("");
     const [selectedCompany, setSelectedCompany] = useState("");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    // Form fields state
+    const [fullName, setFullName] = useState("");
+    const [universityId, setUniversityId] = useState("");
+    const [cgpa, setCgpa] = useState("");
+    const [gradYear, setGradYear] = useState("");
+    const [domain, setDomain] = useState("");
+    const [currentCompany, setCurrentCompany] = useState("");
+    const [jobTitle, setJobTitle] = useState("");
+    const [linkedIn, setLinkedIn] = useState("");
+    const [experienceText, setExperienceText] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const themeColor = role === "student" ? "#d4af37" : role === "senior" ? "#bca33e" : "#d4af37";
 
@@ -91,6 +105,10 @@ export default function AuthPage() {
     };
 
     const handleSendOtp = async () => {
+        if (!email.trim()) {
+            toast.error("Please enter your university email.");
+            return;
+        }
         try {
             setIsSendingOtp(true)
             const res = await fetch('/api/auth/send-otp', {
@@ -145,6 +163,7 @@ export default function AuthPage() {
             if (!res.ok) {
                 throw new Error(data.message);
             }
+            setSignupToken(data.signupToken);
 
             // ✅ OTP verified successfully
             setStep(3);
@@ -156,9 +175,99 @@ export default function AuthPage() {
         }
     };
 
-    const handleComplete = () => {
-        if (role === "student") router.push('/student');
-        if (role === "senior") router.push('/senior');
+    const handleStep3Next = () => {
+        if (!fullName.trim() || !universityId.trim()) {
+            toast.error("Please fill in all basic details.");
+            return;
+        }
+        if (role === "student" && (!branch || !yearOfStudy)) {
+            toast.error("Please select your branch and year of study.");
+            return;
+        }
+        setStep(4);
+    };
+
+    const handleStep4Next = () => {
+        if (role === "student") {
+            if (!cgpa.trim() || !gradYear.trim() || !domain || !receivedOffer) {
+                toast.error("Please fill in all academic stats.");
+                return;
+            }
+            if (receivedOffer === "yes" && !selectedCompany.trim() && !companySearch.trim()) {
+                toast.error("Please specify the company name.");
+                return;
+            }
+        } else if (role === "senior") {
+            if (!currentCompany.trim() || !jobTitle.trim() || !linkedIn.trim()) {
+                toast.error("Please fill in all professional info.");
+                return;
+            }
+        }
+        setStep(5);
+    };
+
+    const handleComplete = async () => {
+        if (role === "student") {
+            if (selectedSkills.length === 0 || !placementGoal) {
+                toast.error("Please select your skills and placement goal.");
+                return;
+            }
+        } else if (role === "senior") {
+            if (!experienceText.trim()) {
+                toast.error("Please share your experience.");
+                return;
+            }
+        }
+
+        try {
+            setIsSubmitting(true);
+
+            // Build the payload
+            const payload: any = {
+                role,
+                fullName,
+                universityId,
+            };
+
+            if (role === "student") {
+                payload.branch = branch;
+                payload.yearOfStudy = parseInt(yearOfStudy);
+                payload.cgpa = parseFloat(cgpa);
+                payload.gradYear = parseInt(gradYear);
+                payload.domain = domain;
+                payload.receivedOffer = receivedOffer==="yes";
+                if (receivedOffer === "yes") payload.companyName = selectedCompany || companySearch;
+                payload.skills = selectedSkills;
+                payload.placementGoal = placementGoal;
+            } else if (role === "senior") {
+                payload.currentCompany = currentCompany;
+                payload.jobTitle = jobTitle;
+                payload.linkedInUrl = linkedIn;
+                payload.experienceText = experienceText;
+            }
+
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json",Authorization:`Bearer ${signupToken}` },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to complete registration");
+            }
+
+            toast.success("Profile created successfully!");
+
+            if (role === "student") router.push('/student');
+            if (role === "senior") router.push('/senior');
+
+        } catch (error: any) {
+            toast.error(error.message || "An error occurred");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const stepLabels = ["Role", "Verify", "Basic", "Details", "Prefs"];
@@ -433,7 +542,7 @@ export default function AuthPage() {
                                         <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">Full Legal Name</label>
                                         <div className="relative flex items-center group">
                                             <User className="absolute left-5 text-white/30 w-5 h-5 group-focus-within:text-[#d4af37] transition-colors duration-500" />
-                                            <input type="text" placeholder="John" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20" />
+                                            <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="John" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20" />
                                         </div>
                                     </motion.div>
 
@@ -441,7 +550,7 @@ export default function AuthPage() {
                                         <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">University ID / Roll Number</label>
                                         <div className="relative flex items-center group">
                                             <Briefcase className="absolute left-5 text-white/30 w-5 h-5 group-focus-within:text-[#d4af37] transition-colors duration-500" />
-                                            <input type="text" placeholder="23BCE1234" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium uppercase placeholder-white/20" />
+                                            <input type="text" value={universityId} onChange={e => setUniversityId(e.target.value)} placeholder="23BCE1234" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium uppercase placeholder-white/20" />
                                         </div>
                                     </motion.div>
 
@@ -486,7 +595,7 @@ export default function AuthPage() {
 
                                     <motion.button
                                         variants={popInVariants}
-                                        onClick={() => setStep(4)}
+                                        onClick={handleStep3Next}
                                         className="w-full py-4 rounded-[20px] font-bold text-black bg-gradient-to-r from-[#d4af37] to-[#bca33e] shadow-[0_10px_30px_rgba(212,175,55,0.2)] mt-2"
                                     >
                                         Next Step
@@ -509,16 +618,16 @@ export default function AuthPage() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <motion.div variants={popInVariants} className="space-y-2">
                                                     <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">Current CGPA</label>
-                                                    <input type="text" placeholder="8.96" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white font-medium placeholder-white/20" />
+                                                    <input type="text" value={cgpa} onChange={e => setCgpa(e.target.value)} placeholder="8.96" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white font-medium placeholder-white/20" />
                                                 </motion.div>
                                                 <motion.div variants={popInVariants} className="space-y-2">
                                                     <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">Grad. Year</label>
-                                                    <input type="text" placeholder="2026" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white font-medium placeholder-white/20" />
+                                                    <input type="text" value={gradYear} onChange={e => setGradYear(e.target.value)} placeholder="2026" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white font-medium placeholder-white/20" />
                                                 </motion.div>
                                             </div>
                                             <motion.div variants={popInVariants} className="space-y-2">
                                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">Primary Domain</label>
-                                                <select defaultValue="" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white/70 font-medium appearance-none mb-4">
+                                                <select value={domain} onChange={e => setDomain(e.target.value)} className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white/70 font-medium appearance-none mb-4">
                                                     <option value="" disabled>Select Domain...</option>
                                                     <option value="sde">Software Engineering (SDE)</option>
                                                     <option value="data">Data Science & ML</option>
@@ -602,18 +711,18 @@ export default function AuthPage() {
                                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">Current Company</label>
                                                 <div className="relative flex items-center group">
                                                     <Building className="absolute left-5 text-white/30 w-5 h-5 group-focus-within:text-[#d4af37] transition-colors duration-500" />
-                                                    <input type="text" placeholder="e.g. Google, Amazon" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20" />
+                                                    <input type="text" value={currentCompany} onChange={e => setCurrentCompany(e.target.value)} placeholder="e.g. Google, Amazon" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20" />
                                                 </div>
                                             </motion.div>
                                             <motion.div variants={popInVariants} className="space-y-2">
                                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">Job Title / Role</label>
-                                                <input type="text" placeholder="e.g. SDE 1" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white font-medium placeholder-white/20" />
+                                                <input type="text" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="e.g. SDE 1" className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 px-5 outline-none focus:border-[#d4af37] transition-all duration-500 text-white font-medium placeholder-white/20" />
                                             </motion.div>
                                             <motion.div variants={popInVariants} className="space-y-2">
                                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-2">LinkedIn Profile URL</label>
                                                 <div className="relative flex items-center group">
                                                     <LinkIcon className="absolute left-5 text-white/30 w-5 h-5 group-focus-within:text-[#d4af37] transition-colors duration-500" />
-                                                    <input type="url" placeholder="https://linkedin.com/..." className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20" />
+                                                    <input type="url" value={linkedIn} onChange={e => setLinkedIn(e.target.value)} placeholder="https://linkedin.com/..." className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20" />
                                                 </div>
                                             </motion.div>
                                         </>
@@ -621,7 +730,7 @@ export default function AuthPage() {
 
                                     <motion.button
                                         variants={popInVariants}
-                                        onClick={() => setStep(5)}
+                                        onClick={handleStep4Next}
                                         className="w-full py-4 rounded-[20px] font-bold text-black mt-4 bg-gradient-to-r from-[#d4af37] to-[#bca33e] shadow-[0_10px_30px_rgba(212,175,55,0.2)]"
                                     >
                                         Next Step
@@ -684,6 +793,8 @@ export default function AuthPage() {
                                                 <div className="relative flex items-center group">
                                                     <Building className="absolute top-5 left-5 text-white/30 w-5 h-5 group-focus-within:text-[#d4af37] transition-colors duration-500" />
                                                     <textarea
+                                                        value={experienceText}
+                                                        onChange={e => setExperienceText(e.target.value)}
                                                         placeholder="e.g. Google, Amazon, Microsoft (Separate by commas)"
                                                         rows={4}
                                                         className="w-full bg-[#0a0a0a] border border-white/10 rounded-[24px] py-4 pl-14 pr-4 outline-none focus:border-[#d4af37] focus:shadow-[0_0_20px_rgba(212,175,55,0.1)] transition-all duration-500 text-white font-medium placeholder-white/20 resize-none"
@@ -696,10 +807,15 @@ export default function AuthPage() {
                                     <motion.button
                                         variants={popInVariants}
                                         onClick={handleComplete}
-                                        className="w-full py-4 rounded-[20px] font-bold text-black mt-6 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
+                                        disabled={isSubmitting}
+                                        className="w-full py-4 rounded-[20px] font-bold text-black mt-6 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] disabled:opacity-70"
                                         style={{ backgroundColor: themeColor }}
                                     >
-                                        <CheckCircle2 size={20} /> Complete Registration
+                                        {isSubmitting ? (
+                                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }} className="w-5 h-5 border-2 border-black border-t-transparent rounded-full" />
+                                        ) : (
+                                            <><CheckCircle2 size={20} /> Complete Registration</>
+                                        )}
                                     </motion.button>
                                 </div>
                             </motion.div>
