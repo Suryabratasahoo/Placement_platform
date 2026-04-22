@@ -10,6 +10,8 @@ import Image from 'next/image';
 export default function AdminDashboard() {
 
   const [index, setIndex] = useState(0);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
+
   const items = [
     { image: "/image1.png" },
     { image: "/image2.png" },
@@ -157,31 +159,32 @@ export default function AdminDashboard() {
 
       {/* === RIGHT COLUMN: Calendar & Suggestions === */}
       <div className="lg:col-span-3 flex flex-col gap-4">
-        <div className="bg-white rounded-[40px] p-6 shadow-sm border border-gray-50">
-          <h2 className="text-2xl font-bold leading-tight mb-2">
+        <div
+          className="bg-[#121212] rounded-[40px] p-6 shadow-2xl border border-white/10 cursor-pointer transition-all duration-500 hover:border-[#d4af37]"
+          onMouseEnter={() => setShowFullCalendar(true)}
+          onMouseLeave={() => setShowFullCalendar(false)}
+        >
+          <h2 className="text-2xl font-serif font-black leading-tight mb-2 text-white">
             Upcoming <span className="inline-block ml-1">📅</span><br />
             Schedules
           </h2>
-          <p className="text-sm text-orange-500 font-semibold flex items-center gap-2 mb-6">
+          <p className="text-[10px] text-[#d4af37] font-bold uppercase tracking-widest flex items-center gap-2 mb-6">
             📦 Drive Dates
           </p>
           <div className="flex justify-between">
             {[
               { day: "Mon", date: 20, done: true },
               { day: "Tue", date: 21, done: true },
-              { day: "Wed", date: 22 },
+              { day: "Wed", date: 22, active: true },
               { day: "Thr", date: 23 },
               { day: "Fri", date: 24 },
             ].map((item) => (
-              <div key={item.date} className="bg-[#f7f7f7] rounded-[26px] px-4 py-3 flex flex-col items-center gap-1 relative w-[52px]">
-                <span className="text-xs text-gray-400 font-semibold">{item.day}</span>
-                <span className="text-lg font-bold text-black">{item.date}</span>
-                <div className={`w-7 h-7 rounded-xl flex items-center justify-center mt-1 ${item.done ? "bg-[#f3b58b]" : "bg-[#c9f3a1]"}`}>
-                  🏢
+              <div key={item.date} className={`rounded-[26px] px-2 py-3 flex flex-col items-center gap-1 relative w-[48px] border transition-colors duration-300 ${item.active ? 'bg-[#d4af37]/20 border-[#d4af37] text-white' : 'bg-white/5 border-white/5 text-white/50'}`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider">{item.day}</span>
+                <span className={`text-lg font-bold ${item.active ? 'text-[#d4af37]' : 'text-white'}`}>{item.date}</span>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-1 text-[10px] font-black ${item.done ? "bg-[#d4af37] text-black" : item.active ? "bg-[#d4af37]/50 text-black" : "bg-white/10 text-white/30"}`}>
+                  {item.done ? '✓' : '•'}
                 </div>
-                {item.done && (
-                  <span className="absolute bottom-1 right-1 w-4 h-4 bg-black text-white text-[10px] flex items-center justify-center rounded-full">✕</span>
-                )}
               </div>
             ))}
           </div>
@@ -224,6 +227,75 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
+
+      {/* === SLIDING FULL MONTH CALENDAR DRAWER === */}
+      <AnimatePresence>
+        {showFullCalendar && (
+          <motion.div
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 w-[420px] h-full bg-[#121212]/95 backdrop-blur-3xl z-50 p-10 flex flex-col shadow-[-30px_0_60px_rgba(0,0,0,0.5)] border-l border-white/10"
+            onMouseEnter={() => setShowFullCalendar(true)}
+            onMouseLeave={() => setShowFullCalendar(false)}
+          >
+            <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+              <h2 className="text-4xl font-serif font-black text-white">April <span className="text-[#d4af37]">2026</span></h2>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-white">
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                <div key={d} className="text-center font-bold text-[#d4af37] text-[10px] uppercase tracking-widest">{d}</div>
+              ))}
+              {/* 3 Blanks for offset */}
+              <div /><div /><div />
+              {[...Array(30)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 cursor-pointer
+                            ${i + 1 === 22 ? 'bg-[#d4af37] text-black shadow-[0_0_15px_rgba(212,175,55,0.4)] scale-110' :
+                      [20, 21].includes(i + 1) ? 'bg-[#d4af37]/20 text-[#d4af37]' :
+                        [15, 28].includes(i + 1) ? 'border border-[#d4af37]/50 text-white' :
+                          'text-white/70 hover:bg-white/10 hover:text-white'}`}
+                >
+                  {i + 1}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 space-y-4 flex-1 overflow-y-auto pr-2 scrollbar-none">
+              <h3 className="text-[#d4af37] font-bold text-[10px] uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#d4af37] animate-pulse" /> Key Events
+              </h3>
+
+              <div className="bg-white/5 p-5 rounded-3xl border border-white/10 relative overflow-hidden group hover:border-[#d4af37]/50 transition-colors cursor-pointer">
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#d4af37]" />
+                <p className="text-white font-bold text-base">Google SDE I Drive</p>
+                <p className="text-white/40 text-xs font-medium mt-1 uppercase tracking-wider">April 15 • 10:00 AM</p>
+                <div className="mt-3 flex gap-2">
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-[10px] text-white font-bold">Registration</span>
+                </div>
+              </div>
+
+              <div className="bg-white/5 p-5 rounded-3xl border border-white/10 relative overflow-hidden group hover:border-[#bca33e]/50 transition-colors cursor-pointer">
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#bca33e]" />
+                <p className="text-white font-bold text-base">Amazon Assessment</p>
+                <p className="text-white/40 text-xs font-medium mt-1 uppercase tracking-wider">April 28 • 02:00 PM</p>
+                <div className="mt-3 flex gap-2">
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-[10px] text-white font-bold">OA Link Sent</span>
+                </div>
+              </div>
+            </div>
+
+            <button className="w-full mt-6 py-4 rounded-full border border-white/10 text-white/50 text-xs font-bold uppercase tracking-wider hover:bg-white/5 hover:text-white transition-all">
+              View Full Year Report
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </motion.main>
   );
 }

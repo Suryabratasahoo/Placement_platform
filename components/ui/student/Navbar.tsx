@@ -4,16 +4,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Home, Briefcase, FileText, CheckSquare, Settings, X, Zap, Bell, GraduationCap } from 'lucide-react';
+import { Home, Briefcase, FileText, CheckSquare, Settings, X, Zap, Bell, GraduationCap, BookOpen, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUserStore } from '@/store/userStore';
 
 // Updated menu items for Student context
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/student' },
   { id: 'drives', label: 'Drives', icon: Briefcase, path: '/student/drives' },
   { id: 'applications', label: 'Applications', icon: CheckSquare, path: '/student/applications' },
-  { id: 'resources', label: 'Resources', icon: FileText, path: '/student/resources' },
+  { id: 'questions', label: 'Questions', icon: MessageSquare, path: '/student/questions' },
+  { id: 'experiences', label: 'Experiences', icon: BookOpen, path: '/student/experiences' },
+  { id: 'announcements', label: 'Announcements', icon: Bell, path: '/student/announcements' },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/student/settings' },
 ];
 
@@ -26,6 +29,7 @@ const ModernHamburger = ({ onClick }: { onClick: () => void }) => (
 );
 
 export default function StudentNavbar() {
+  const { name } = useUserStore();
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -90,7 +94,7 @@ export default function StudentNavbar() {
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-5">
             <div className="flex flex-col items-end">
-              <h2 className="text-sm font-bold leading-none mb-1">Hello, Shubhayu</h2>
+              <h2 className="text-sm font-bold leading-none mb-1">Hello, {name || 'Student'}</h2>
               <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
                 <Zap size={10} className="text-[#b4a9f8] fill-[#b4a9f8]" />
                 <span>CGPA 8.96</span>
@@ -102,7 +106,7 @@ export default function StudentNavbar() {
               className="w-11 h-11 rounded-full border-2 border-[#b4a9f8] p-0.5 bg-[#d9d4fc] cursor-pointer"
             >
               <img 
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Shubhayu" 
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name || 'Student'}`} 
                 className="rounded-full w-full h-full object-cover" 
                 alt="User Avatar" 
               />
@@ -171,9 +175,9 @@ export default function StudentNavbar() {
 
               <div className="mt-auto pt-6 border-t border-white/5">
                 <div className="flex items-center gap-4 bg-black/20 p-4 rounded-2xl">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Shubhayu" className="w-10 h-10 rounded-full bg-[#d9d4fc]" alt="User" />
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name || 'Student'}`} className="w-10 h-10 rounded-full bg-[#d9d4fc]" alt="User" />
                     <div>
-                        <p className="font-bold text-sm">Shubhayu</p>
+                        <p className="font-bold text-sm">{name || 'Student'}</p>
                         <p className="text-[10px] text-[#b4a9f8] uppercase font-bold">CGPA 8.96</p>
                     </div>
                 </div>

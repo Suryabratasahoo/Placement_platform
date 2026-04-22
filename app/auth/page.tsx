@@ -13,12 +13,15 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import Fuse from "fuse.js"
 import { toast } from "react-hot-toast"
+import { useUserStore } from "@/store/userStore"
+import Cookies from "js-cookie"
 
 
 type Role = "student" | "senior" | null;
 
 export default function AuthPage() {
     const router = useRouter();
+    const setAuth = useUserStore((state: any) => state.setAuth);
     const [step, setStep] = useState(1);
     const [role, setRole] = useState<Role>(null);
     const [isVerifying, setIsVerifying] = useState(false);
@@ -259,6 +262,22 @@ export default function AuthPage() {
             }
 
             toast.success("Profile created successfully!");
+
+            // 1. Store in Cookies for Middleware (Edge support)
+            Cookies.set("token", data.token, { expires: 7 });
+
+            // 2. Sync with Zustand Store for Global State
+            setAuth({
+                userId: data.user.id,
+                name: data.user.fullName,
+                email: data.user.email,
+                role: data.user.role,
+                universityId: data.user.universityId
+            });
+
+            // 3. Fallback for legacy components
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
 
             if (role === "student") router.push('/student');
             if (role === "senior") router.push('/senior');

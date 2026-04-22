@@ -139,6 +139,7 @@ export async function POST(req: Request) {
         email: newUser.email,
         role: newUser.role,
         fullName: newUser.fullName,
+        universityId: newUser.universityId,
       },
     });
 

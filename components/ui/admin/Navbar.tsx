@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { Home, Briefcase, Users, Megaphone, Settings, X, Shield, Bell } from 'lucide-react';
+import { Home, Briefcase, Users, Megaphone, Settings, X, Shield, Bell, FileSearch } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -14,6 +14,7 @@ const menuItems = [
   { id: 'drives', label: 'Manage Drives', icon: Briefcase, path: '/admin/drives' },
   { id: 'students', label: 'Students', icon: Users, path: '/admin/students' },
   { id: 'announcements', label: 'Announcements', icon: Megaphone, path: '/admin/announcements' },
+  { id: 'review', label: 'Review', icon: FileSearch, path: '/admin/review' },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 

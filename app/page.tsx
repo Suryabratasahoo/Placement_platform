@@ -180,7 +180,7 @@ function HeroContent() {
           <span className="text-2xl font-black tracking-tighter">EduView</span>
         </div>
         <div className="hidden md:flex gap-6 items-center">
-          <Link href="/admin"><span className="text-sm font-bold text-gray-500 hover:text-black transition">For Admins</span></Link>
+          <Link href="/adminsecure"><span className="text-sm font-bold text-gray-500 hover:text-black transition">For Admins</span></Link>
           <Link href="/senior"><span className="text-sm font-bold text-gray-500 hover:text-black transition">For Seniors</span></Link>
         </div>
       </div>

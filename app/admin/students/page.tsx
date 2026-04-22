@@ -12,18 +12,52 @@ import {
     CheckCircle,
     Clock
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function AdminStudentsPage() {
+    const [students, setStudents] = useState<any[]>([])
+    const [filteredStudents, setFilteredStudents] = useState<any[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [searchQuery, setSearchQuery] = useState("")
     const [activeBranch, setActiveBranch] = useState("All");
+    const [activeStatus, setActiveStatus] = useState("All");
+    const [minCgpa, setMinCgpa] = useState("")
+    const [maxCgpa, setMaxCgpa] = useState("")
 
-    const students = [
-        { name: "Rahul Sharma", branch: "CSE", cgpa: "9.2", status: "Placed", company: "Google", apps: 12 },
-        { name: "Aditi Verma", branch: "ECE", cgpa: "8.8", status: "Interviewing", company: "Amazon", apps: 18 },
-        { name: "Karan Patel", branch: "CSE", cgpa: "8.5", status: "Unplaced", company: null, apps: 24 },
-        { name: "Neha Singh", branch: "IT", cgpa: "9.5", status: "Placed", company: "Microsoft", apps: 5 },
-        { name: "Vikram Reddy", branch: "MEC", cgpa: "7.9", status: "Interviewing", company: "TCS", apps: 30 },
-    ]
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const res = await fetch('/api/admin/students')
+                if (!res.ok) throw new Error("Failed to fetch students")
+                const data = await res.json()
+                setStudents(data)
+                setFilteredStudents(data)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchStudents()
+    }, [])
+
+    useEffect(() => {
+        const filtered = students.filter(student => {
+            const matchesSearch = student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                 (student.universityId && student.universityId.toLowerCase().includes(searchQuery.toLowerCase()));
+            const matchesBranch = activeBranch === "All" || student.branch === activeBranch;
+            const matchesStatus = activeStatus === "All" || 
+                                 (activeStatus === "Placed" && student.receivedOffer) || 
+                                 (activeStatus === "Unplaced" && !student.receivedOffer);
+            
+            const cgpa = student.cgpa || 0;
+            const matchesMinCgpa = minCgpa === "" || cgpa >= parseFloat(minCgpa);
+            const matchesMaxCgpa = maxCgpa === "" || cgpa <= parseFloat(maxCgpa);
+
+            return matchesSearch && matchesBranch && matchesStatus && matchesMinCgpa && matchesMaxCgpa;
+        })
+        setFilteredStudents(filtered)
+    }, [searchQuery, activeBranch, activeStatus, minCgpa, maxCgpa, students])
 
     return (
         <motion.main
@@ -47,11 +81,13 @@ export default function AdminStudentsPage() {
                         <input
                             placeholder="Search by name, roll number..."
                             className="ml-3 flex-1 bg-transparent outline-none text-sm"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
 
                     {/* Filter Pills */}
-                    {["All", "CSE", "ECE", "IT", "MEC", "CIVIL"].map(branch => (
+                    {["All", "CSE", "ECE", "IT", "MEC", "CIVIL", "AIML"].map(branch => (
                         <button
                             key={branch}
                             onClick={() => setActiveBranch(branch)}
@@ -70,84 +106,92 @@ export default function AdminStudentsPage() {
                 {/* ===== STUDENTS GRID ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
 
-                    {students.map((student, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            className="relative h-56 bg-[#0c0c0c] rounded-[40px] p-6 overflow-hidden shadow-xl group cursor-pointer"
-                        >
+                    {isLoading ? (
+                        <div className="col-span-full py-20 flex justify-center">
+                            <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : filteredStudents.length > 0 ? (
+                        filteredStudents.map((student, i) => (
+                            <motion.div
+                                key={student._id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                className="relative h-56 bg-[#0c0c0c] rounded-[40px] p-6 overflow-hidden shadow-xl group cursor-pointer"
+                            >
 
-                            {/* Scribble */}
-                            <svg className="absolute right-0 top-0 h-full opacity-20 transition-opacity group-hover:opacity-40" viewBox="0 0 200 200">
-                                <path
-                                    fill="none"
-                                    stroke="white"
-                                    strokeWidth="1.5"
-                                    d="M100,20 C150,50 50,150 180,180"
-                                    strokeLinecap="round"
-                                />
-                            </svg>
+                                {/* Scribble */}
+                                <svg className="absolute right-0 top-0 h-full opacity-20 transition-opacity group-hover:opacity-40" viewBox="0 0 200 200">
+                                    <path
+                                        fill="none"
+                                        stroke="white"
+                                        strokeWidth="1.5"
+                                        d="M100,20 C150,50 50,150 180,180"
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
 
-                            {/* Top row */}
-                            <div className="flex justify-between relative z-10">
-                                <div className="w-10 h-10 bg-[#26282b] rounded-full border border-gray-600 flex items-center justify-center text-white">
-                                    <User size={16} />
+                                {/* Top row */}
+                                <div className="flex justify-between relative z-10">
+                                    <div className="w-10 h-10 bg-[#26282b] rounded-full border border-gray-600 flex items-center justify-center text-white text-xs font-black">
+                                        {student.fullName ? student.fullName.charAt(0) : <User size={16} />}
+                                    </div>
+                                    
+                                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 h-fit
+                                        ${student.receivedOffer ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
+                                          'bg-gray-500/20 text-gray-400 border border-gray-500/30'}`}
+                                    >
+                                        {student.receivedOffer ? <CheckCircle size={10} /> : <Clock size={10} />}
+                                        {student.receivedOffer ? "Placed" : "Unplaced"}
+                                    </div>
                                 </div>
-                                
-                                <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 h-fit
-                                    ${student.status === 'Placed' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
-                                      student.status === 'Interviewing' ? 'bg-[#FFA365]/20 text-[#FFA365] border border-[#FFA365]/30' : 
-                                      'bg-gray-500/20 text-gray-400 border border-gray-500/30'}`}
-                                >
-                                    {student.status === 'Placed' ? <CheckCircle size={10} /> : <Clock size={10} />}
-                                    {student.status}
-                                </div>
-                            </div>
 
-                            {/* Content */}
-                            <div className="relative z-10 mt-4 space-y-2">
-                                <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase flex items-center gap-2">
-                                    <GraduationCap size={14} /> {student.branch} • CGPA {student.cgpa}
-                                </p>
-                                <h2 className="text-white text-xl font-bold leading-snug truncate">
-                                    {student.name}
-                                </h2>
-                                {student.company && (
-                                    <p className="text-sm text-gray-400 font-semibold truncate pt-1">
-                                        {student.status === 'Placed' ? 'Placed at ' : 'Interviewing at '} 
-                                        <span className="text-white">{student.company}</span>
+                                {/* Content */}
+                                <div className="relative z-10 mt-4 space-y-2">
+                                    <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase flex items-center gap-2">
+                                        <GraduationCap size={14} /> {student.branch || "General"} • CGPA {student.cgpa || "N/A"}
                                     </p>
-                                )}
-                            </div>
-
-                            {/* Bottom */}
-                            <div className="flex justify-between items-end relative z-10 mt-auto">
-                                <div className="text-gray-400 font-semibold text-sm">
-                                    {student.apps} Applications
+                                    <h2 className="text-white text-xl font-bold leading-snug truncate">
+                                        {student.fullName}
+                                    </h2>
+                                    {student.receivedOffer && student.companyName && (
+                                        <p className="text-sm text-gray-400 font-semibold truncate pt-1">
+                                            Placed at <span className="text-white">{student.companyName}</span>
+                                        </p>
+                                    )}
                                 </div>
 
-                                <div className="relative w-12 h-12 flex items-center justify-center group/btn">
-                                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-                                        <circle
-                                            cx="50"
-                                            cy="50"
-                                            r="46"
-                                            fill="none"
-                                            stroke="#FFA365"
-                                            strokeWidth="3"
-                                            strokeLinecap="round"
-                                            className="stroke-dasharray-[289] stroke-dashoffset-[289] transition-all duration-700 ease-in-out group-hover/btn:stroke-dashoffset-0"
-                                        />
-                                    </svg>
-                                    <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition-transform duration-300 group-hover/btn:scale-105">
-                                        <ArrowRight className="w-4 h-4 text-black" />
-                                    </button>
+                                {/* Bottom */}
+                                <div className="flex justify-between items-end relative z-10 mt-auto">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                        Joined {new Date(student.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                                    </div>
+
+                                    <div className="relative w-12 h-12 flex items-center justify-center group/btn">
+                                        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                            <circle
+                                                cx="50"
+                                                cy="50"
+                                                r="46"
+                                                fill="none"
+                                                stroke="#FFA365"
+                                                strokeWidth="3"
+                                                strokeLinecap="round"
+                                                className="stroke-dasharray-[289] stroke-dashoffset-[289] transition-all duration-700 ease-in-out group-hover/btn:stroke-dashoffset-0"
+                                            />
+                                        </svg>
+                                        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center transition-transform duration-300 group-hover/btn:scale-105">
+                                            <ArrowRight className="w-4 h-4 text-black" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 text-center text-gray-400 font-semibold">
+                            No students found in this category.
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -163,10 +207,15 @@ export default function AdminStudentsPage() {
                     {/* Status Filters */}
                     <div>
                         <div className="flex flex-wrap gap-2">
-                            {["All", "Placed", "Interviewing", "Unplaced"].map(status => (
+                            {["All", "Placed", "Unplaced"].map(status => (
                                 <button
                                     key={status}
-                                    className="px-4 py-1.5 rounded-full text-sm font-semibold bg-gray-100 hover:bg-black hover:text-white transition"
+                                    onClick={() => setActiveStatus(status)}
+                                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition cursor-pointer
+                                    ${activeStatus === status 
+                                        ? "bg-black text-white shadow-md" 
+                                        : "bg-gray-100 border border-transparent hover:border-black/10 hover:bg-white transition-all"}
+                                    `}
                                 >
                                     {status}
                                 </button>
@@ -175,11 +224,23 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className="pt-4 border-t border-gray-100">
-                        <p className="text-xs text-gray-400 font-semibold uppercase mb-3">CGPA Range</p>
+                        <p className="text-xs text-gray-400 font-bold uppercase mb-3 tracking-widest pl-1">CGPA Range</p>
                         <div className="flex items-center gap-2">
-                            <input type="text" placeholder="Min" className="w-16 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center outline-none" />
-                            <span className="text-gray-400">-</span>
-                            <input type="text" placeholder="Max" className="w-16 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center outline-none" />
+                            <input 
+                                type="number" 
+                                placeholder="Min" 
+                                value={minCgpa}
+                                onChange={(e) => setMinCgpa(e.target.value)}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3 py-2 text-sm text-center outline-none focus:border-black focus:bg-white transition-all font-bold" 
+                            />
+                            <span className="text-gray-300 font-bold">-</span>
+                            <input 
+                                type="number" 
+                                placeholder="Max" 
+                                value={maxCgpa}
+                                onChange={(e) => setMaxCgpa(e.target.value)}
+                                className="w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3 py-2 text-sm text-center outline-none focus:border-black focus:bg-white transition-all font-bold" 
+                            />
                         </div>
                     </div>
                 </div>

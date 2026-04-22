@@ -11,7 +11,8 @@ import {
     SlidersHorizontal,
     Search
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import toast from "react-hot-toast"
 import Link from "next/link" // <-- Added this import!
 
 export default function StudentDrivesPage() {
@@ -19,12 +20,33 @@ export default function StudentDrivesPage() {
     const [activeCompany, setActiveCompany] = useState("All")
     const [activeRole, setActiveRole] = useState("All")
 
-    const drives = [
-        { company: "Google", role: "Software Engineer", date: "Oct 15, 2026", location: "Bangalore", ctc: "24 LPA", applicants: 142 },
-        { company: "Amazon", role: "Frontend Developer", date: "Oct 18, 2026", location: "Hyderabad", ctc: "18 LPA", applicants: 98 },
-        { company: "Microsoft", role: "Backend Engineer", date: "Oct 22, 2026", location: "Noida", ctc: "22 LPA", applicants: 156 },
-        { company: "Atlassian", role: "UI/UX Designer", date: "Nov 05, 2026", location: "Remote", ctc: "16 LPA", applicants: 88 },
-    ]
+    const [drives, setDrives] = useState<any[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [searchTerm, setSearchTerm] = useState("")
+
+    useEffect(() => {
+        const fetchDrives = async () => {
+            try {
+                const res = await fetch("/api/student/drives")
+                if (!res.ok) throw new Error("Failed to fetch")
+                setDrives(await res.json())
+            } catch (error) {
+                toast.error("Failed to fetch upcoming drives.")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchDrives()
+    }, [])
+
+    const filteredDrives = drives.filter(d => {
+        const roleStr = Array.isArray(d.role) ? d.role.join(', ') : d.role;
+        const matchesSearch = d.companyName.toLowerCase().includes(searchTerm.toLowerCase()) || roleStr.toLowerCase().includes(searchTerm.toLowerCase())
+        // Simplistic logic bridging active tabs to data models:
+        const matchesCompany = activeCompany === "All" || d.companyName.toLowerCase().includes(activeCompany.toLowerCase())
+        const matchesRole = activeRole === "All" || roleStr.toLowerCase().includes(activeRole.toLowerCase())
+        return matchesSearch && matchesCompany && matchesRole
+    })
 
     return (
         <motion.main
@@ -45,7 +67,9 @@ export default function StudentDrivesPage() {
                     <div className="flex items-center bg-white rounded-full px-5 py-3 shadow-sm border border-gray-100 w-full max-w-xs">
                         <Search size={20} className="text-gray-400" />
                         <input
-                            placeholder="Search companies..."
+                            placeholder="Search companies or roles..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="ml-3 flex-1 bg-transparent outline-none text-sm"
                         />
                     </div>
@@ -54,9 +78,12 @@ export default function StudentDrivesPage() {
                 {/* DRIVES GRID */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-                    {drives.map((drive, i) => (
-                        // <-- Wrapped the card in a Link tag and moved the key here!
-                        <Link href="/student/drives/particularDrive" key={i}>
+                    {isLoading ? (
+                        <div className="col-span-full py-20 flex justify-center text-[#FFA365]">Loading drives...</div>
+                    ) : filteredDrives.length === 0 ? (
+                        <div className="col-span-full py-20 flex justify-center text-gray-400 font-bold">No active drives match your filters.</div>
+                    ) : filteredDrives.map((drive, i) => (
+                        <Link href={`/student/drives/${drive._id}`} key={drive._id}>
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -80,24 +107,22 @@ export default function StudentDrivesPage() {
                                     <div className="w-10 h-10 bg-[#26282b] rounded-full border border-gray-600 flex items-center justify-center text-white">
                                         <Briefcase size={16} />
                                     </div>
+                                    <span className="text-[10px] uppercase font-bold tracking-widest bg-white/10 px-3 py-1 rounded-full text-white">{drive.placementType}</span>
                                 </div>
 
                                 {/* Content */}
                                 <div className="relative z-10 mt-4 space-y-2">
-                                    <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase">
-                                        {drive.company}
+                                    <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase line-clamp-1">
+                                        {drive.companyName}
                                     </p>
 
-                                    <h2 className="text-white text-lg font-bold leading-snug">
-                                        {drive.role}
+                                    <h2 className="text-white text-lg font-bold leading-snug line-clamp-1">
+                                        {Array.isArray(drive.role) ? drive.role.join(', ') : drive.role}
                                     </h2>
 
                                     <div className="text-white text-sm opacity-80 space-y-1 mt-2">
-                                        <p className="flex items-center gap-2">
-                                            <Calendar size={14} className="text-[#b4a9f8]" /> {drive.date}
-                                        </p>
-                                        <p className="flex items-center gap-2">
-                                            <MapPin size={14} className="text-[#b4a9f8]" /> {drive.location}
+                                        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                                            <Calendar size={14} className="text-[#b4a9f8]" /> Deadline: {drive.lastDate}
                                         </p>
                                     </div>
                                 </div>
