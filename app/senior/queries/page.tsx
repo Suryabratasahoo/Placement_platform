@@ -12,7 +12,7 @@ import {
     ChevronRight,
     ArrowRight
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link" // <-- Added Link import!
 
@@ -27,38 +27,25 @@ export default function QuestionsFeedPage() {
         { image: "/image3.png" },
     ]
 
-    const questions = [
-        {
-            title: "How to find intersection of two linked lists in O(1) space?",
-            tags: ["DSA", "Linked List"],
-            upvotes: 124,
-            answers: 18,
-        },
-        {
-            title: "Most common HR interview questions for freshers?",
-            tags: ["HR"],
-            upvotes: 89,
-            answers: 12,
-        },
-        {
-            title: "Google SDE preparation roadmap?",
-            tags: ["Company", "Google"],
-            upvotes: 210,
-            answers: 34,
-        },
-        {
-            title: "Best way to optimize recursion in DP problems?",
-            tags: ["DSA"],
-            upvotes: 56,
-            answers: 9,
-        },
-        {
-            title: "How to crack Amazon OA in 30 days?",
-            tags: ["Company"],
-            upvotes: 143,
-            answers: 27,
-        },
-    ]
+    const [questions, setQuestions] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetch('/api/queries')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) setQuestions(data.data)
+                setLoading(false)
+            })
+            .catch(err => {
+                console.error(err)
+                setLoading(false)
+            })
+    }, [])
+
+    const filteredQuestions = activeTag === "All" 
+        ? questions 
+        : questions.filter(q => q.tags.includes(activeTag))
 
     const nextStep = () => setIndex((prev) => (prev + 1) % items.length)
     const prevStep = () => setIndex((prev) => (prev - 1 + items.length) % items.length)
@@ -127,9 +114,9 @@ export default function QuestionsFeedPage() {
                 {/* ===== QUESTIONS GRID ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-                    {questions.map((q, i) => (
+                    {filteredQuestions.map((q, i) => (
                         // <-- Wrapped in Link tag here!
-                        <Link href="/senior/queries/particularQuestion" key={i}>
+                        <Link href={`/senior/queries/particularQuestion?id=${q._id}`} key={q._id || i}>
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -172,8 +159,8 @@ export default function QuestionsFeedPage() {
                                 <div className="flex justify-between items-end relative z-10 mt-auto">
 
                                     <div className="flex gap-4 text-white font-semibold text-sm">
-                                        👍 {q.upvotes}
-                                        💬 {q.answers}
+                                        👍 {q.upvotes || 0}
+                                        💬 {q.answers?.length || 0}
                                     </div>
 
                                     <div className="relative w-12 h-12 flex items-center justify-center group">

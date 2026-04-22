@@ -4,7 +4,8 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, MessageCircle, ThumbsUp, Send, ThumbsDown } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link" // <-- Added Link import!
 
 // 1. Dedicated Floating Emoji Component
@@ -138,20 +139,65 @@ const CommentCard = ({ user, text }: { user: string; text: string }) => {
 
 
 // 3. Main Page Component
-export default function QuestionDetailPage() {
+function QuestionDetailContent() {
+    const searchParams = useSearchParams()
+    const id = searchParams.get("id")
+
+    const [query, setQuery] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
     const [liked, setLiked] = useState(false)
-    const [likes, setLikes] = useState(124)
+    const [likes, setLikes] = useState(0)
     const [inputText, setInputText] = useState("")
 
-    const comments = Array.from({ length: 5 }).map((_, i) => ({
-        user: i % 2 === 0 ? "Amber Stone" : "Dev Master",
-        text: "The O(1) space solution usually involves calculating the length of both lists and aligning the starting pointers. It's an elegant trick for technical interviews!"
-    }))
+    useEffect(() => {
+        if (!id) return;
+        fetch(`/api/queries/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setQuery(data.data)
+                    setLikes(data.data.upvotes || 0)
+                }
+                setLoading(false)
+            })
+            .catch(err => {
+                console.error(err)
+                setLoading(false)
+            })
+    }, [id])
 
     const toggleLike = () => {
         setLiked(!liked)
         setLikes(prev => liked ? prev - 1 : prev + 1)
     }
+
+    const handleSend = async () => {
+        if (!inputText.trim() || !query) return;
+
+        const newAnswer = {
+            user: "Senior Alumni",
+            role: "senior",
+            text: inputText
+        }
+
+        try {
+            const res = await fetch(`/api/queries/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newAnswer)
+            })
+            const data = await res.json()
+            if (data.success) {
+                setQuery(data.data)
+                setInputText("")
+            }
+        } catch (error) {
+            console.error("Failed to post answer", error)
+        }
+    }
+
+    if (loading) return <div className="p-8 text-black grid grid-cols-1 lg:grid-cols-12 gap-4 bg-white rounded-[40px] h-screen overflow-hidden">Loading...</div>
+    if (!query) return <div className="p-8 text-black grid grid-cols-1 lg:grid-cols-12 gap-4 bg-white rounded-[40px] h-screen overflow-hidden">Query not found.</div>
 
     return (
         <motion.main
@@ -171,8 +217,8 @@ export default function QuestionDetailPage() {
                 </Link>
 
                 <div className="space-y-4">
-                    <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase">DSA • Linked List</p>
-                    <h2 className="text-xl font-bold leading-snug">How to find intersection of two linked lists in O(1) space?</h2>
+                    <p className="text-orange-300 text-xs font-bold tracking-[0.18em] uppercase">{query.tags?.join(" • ") || "No Tags"}</p>
+                    <h2 className="text-xl font-bold leading-snug">{query.title}</h2>
                     
                     <div className="flex gap-5 text-sm font-semibold pt-2">
                         <button onClick={toggleLike} className={`flex items-center gap-1 transition ${liked ? "text-orange-400" : "text-white"}`}>
@@ -180,7 +226,7 @@ export default function QuestionDetailPage() {
                             {likes}
                         </button>
                         <span className="flex items-center gap-1 opacity-80">
-                            <MessageCircle size={16} /> 18
+                            <MessageCircle size={16} /> {query.answers?.length || 0}
                         </span>
                     </div>
                 </div>
@@ -199,7 +245,7 @@ export default function QuestionDetailPage() {
                             rows={1}
                             className="flex-1 bg-transparent px-2 py-1 resize-none outline-none text-sm text-white placeholder-gray-400"
                         />
-                        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-105 transition shadow-lg shadow-white/10">
+                        <button onClick={handleSend} className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-105 transition shadow-lg shadow-white/10">
                             <Send size={16} className="text-black" />
                         </button>
                     </div>
@@ -210,15 +256,23 @@ export default function QuestionDetailPage() {
             <div className="lg:col-span-9 bg-[#f9fafb] rounded-[40px] p-8 flex flex-col overflow-hidden border border-gray-100">
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl font-bold text-gray-900">Answers</h2>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">5 Responses</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{query.answers?.length || 0} Responses</span>
                 </div>
                 
                 <div className="flex-1 overflow-y-auto scrollbar-none space-y-6 pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                    {comments.map((c, i) => (
+                    {query.answers?.map((c: any, i: number) => (
                         <CommentCard key={i} user={c.user} text={c.text} />
                     ))}
                 </div>
             </div>
         </motion.main>
+    )
+}
+
+export default function QuestionDetailPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-black grid grid-cols-1 lg:grid-cols-12 gap-4 bg-white rounded-[40px] h-screen overflow-hidden">Loading...</div>}>
+            <QuestionDetailContent />
+        </Suspense>
     )
 }
