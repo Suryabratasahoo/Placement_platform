@@ -13,6 +13,8 @@ export interface IQuery {
         role: string;
         text: string;
         votes: number;
+        likes: string[];     // ADDED
+        dislikes: string[];  // ADDED
         createdAt: Date;
     }[];
     createdAt: Date;
@@ -30,6 +32,8 @@ const QuerySchema = new Schema<IQuery>({
             role: { type: String, required: true },
             text: { type: String, required: true },
             votes: { type: Number, default: 0 },
+            likes: [{ type: String }],    // ADDED
+            dislikes: [{ type: String }], // ADDED
             createdAt: { type: Date, default: Date.now }
         }
     ],

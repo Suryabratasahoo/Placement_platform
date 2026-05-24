@@ -1,0 +1,246 @@
+Folder PATH listing for volume Local Disk
+Volume serial number is 0000008E C31F:6BB0
+D:.
+|   .env.local
+|   .gitignore
+|   eslint.config.mjs
+|   generate_struct.bat
+|   middleware.ts
+|   mock_experiences.js
+|   mock_experiences.ts
+|   next-env.d.ts
+|   next.config.ts
+|   package-lock.json
+|   package.json
+|   postcss.config.mjs
+|   README.md
+|   shubhayu_readme.txt
+|   struct.txt
+|   test.js
+|   tsconfig.json
+|   
++---app
+|   |   favicon.ico
+|   |   globals.css
+|   |   layout.tsx
+|   |   page.tsx
+|   |   
+|   +---admin
+|   |   |   layout.tsx
+|   |   |   page.tsx
+|   |   |   
+|   |   +---announcements
+|   |   |       page.tsx
+|   |   |       
+|   |   +---drives
+|   |   |   |   page.tsx
+|   |   |   |   
+|   |   |   \---[id]
+|   |   |           page.tsx
+|   |   |           
+|   |   +---postdrive
+|   |   |       page.tsx
+|   |   |       
+|   |   +---review
+|   |   |       page.tsx
+|   |   |       
+|   |   \---students
+|   |           page.tsx
+|   |           
+|   +---adminsecure
+|   |       page.tsx
+|   |       
+|   +---api
+|   |   +---admin
+|   |   |   +---announcements
+|   |   |   |   |   route.ts
+|   |   |   |   |   
+|   |   |   |   \---[id]
+|   |   |   |           route.ts
+|   |   |   |           
+|   |   |   +---drives
+|   |   |   |   |   route.ts
+|   |   |   |   |   
+|   |   |   |   \---[id]
+|   |   |   |           route.ts
+|   |   |   |           
+|   |   |   +---reviews
+|   |   |   |   |   route.ts
+|   |   |   |   |   
+|   |   |   |   \---[id]
+|   |   |   |           route.ts
+|   |   |   |           
+|   |   |   \---students
+|   |   |           route.ts
+|   |   |           
+|   |   +---auth
+|   |   |   +---admin-login
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   +---register
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   +---send-otp
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   +---verify-otp
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   \---verify-signin
+|   |   |           route.ts
+|   |   |           
+|   |   +---experiences
+|   |   |   \---[id]
+|   |   |           route.ts
+|   |   |           
+|   |   +---queries
+|   |   |   |   route.ts
+|   |   |   |   
+|   |   |   \---[id]
+|   |   |       |   route.ts
+|   |   |       |   
+|   |   |       \---vote
+|   |   |               route.ts
+|   |   |               
+|   |   +---student
+|   |   |   +---announcements
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   +---answers
+|   |   |   |   \---[id]
+|   |   |   |       |   route.ts
+|   |   |   |       |   
+|   |   |   |       \---react
+|   |   |   |               route.ts
+|   |   |   |               
+|   |   |   +---applications
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   +---drives
+|   |   |   |   |   route.ts
+|   |   |   |   |   
+|   |   |   |   \---[id]
+|   |   |   |       |   route.ts
+|   |   |   |       |   
+|   |   |   |       \---apply
+|   |   |   |               route.ts
+|   |   |   |               
+|   |   |   +---experiences
+|   |   |   |       route.ts
+|   |   |   |       
+|   |   |   \---questions
+|   |   |       |   route.ts
+|   |   |       |   
+|   |   |       \---[id]
+|   |   |           |   route.ts
+|   |   |           |   
+|   |   |           \---upvote
+|   |   |                   route.ts
+|   |   |                   
+|   |   \---upload
+|   |           route.ts
+|   |           
+|   +---auth
+|   |       page.tsx
+|   |       
+|   +---senior
+|   |   |   layout.tsx
+|   |   |   loadingContent.tsx
+|   |   |   page.tsx
+|   |   |   
+|   |   +---analytics
+|   |   |       page.tsx
+|   |   |       
+|   |   +---experiences
+|   |   |   |   page.tsx
+|   |   |   |   
+|   |   |   \---experience
+|   |   |           page.tsx
+|   |   |           
+|   |   \---queries
+|   |       |   page.tsx
+|   |       |   
+|   |       \---particularQuestion
+|   |               page.tsx
+|   |               
+|   +---signin
+|   |       page.tsx
+|   |       
+|   \---student
+|       |   layout.tsx
+|       |   page.tsx
+|       |   
+|       +---announcements
+|       |       page.tsx
+|       |       
+|       +---applications
+|       |       page.tsx
+|       |       
+|       +---drives
+|       |   |   page.tsx
+|       |   |   
+|       |   +---particularDrive
+|       |   |       page.tsx
+|       |   |       
+|       |   \---[id]
+|       |           page.tsx
+|       |           
+|       +---experiences
+|       |       page.tsx
+|       |       
+|       +---questions
+|       |   |   page.tsx
+|       |   |   
+|       |   \---[id]
+|       |           page.tsx
+|       |           
+|       \---resources
+|           |   page.tsx
+|           |   
+|           \---[id]
+|                   page.tsx
+|                   
++---components
+|   \---ui
+|       |   skeleton.tsx
+|       |   
+|       +---admin
+|       |       Navbar.tsx
+|       |       
+|       +---senior
+|       |       Navbar.tsx
+|       |       
+|       \---student
+|               Navbar.tsx
+|               
++---lib
+|   |   mail.ts
+|   |   mongodb.js
+|   |   mongodb.ts
+|   |   proxy.ts
+|   |   redis.ts
+|   |   
+|   \---models
+|           Experience.ts
+|           Query.ts
+|           
++---model
+|       Admin.ts
+|       Announcement.ts
+|       Answer.ts
+|       Application.ts
+|       Drive.ts
+|       Experience.js
+|       Experience.ts
+|       Question.ts
+|       User.ts
+|       
++---public
+|       helpjunior.png
+|       image1.png
+|       image2.png
+|       image3.png
+|       
+\---store
+        userStore.ts
+        
